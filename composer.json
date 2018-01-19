@@ -1,0 +1,13 @@
+{
+  "name": "leankoala/pagespeedinsights",
+  "description": "PHP library for google page speed insights",
+  "license": "MIT",
+  "require": {
+    "php": ">= 5.4.0",
+  },
+  "autoload": {
+    "psr-4": {
+      "Leankoala\\PageSpeedInsights\\": "src/"
+    }
+  }
+}
