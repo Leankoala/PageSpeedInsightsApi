@@ -19,7 +19,6 @@ class InsightsRetriever
 
     private $apiKey;
 
-
     /**
      * @var Client
      */
