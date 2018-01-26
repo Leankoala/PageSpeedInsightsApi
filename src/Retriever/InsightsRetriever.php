@@ -43,7 +43,7 @@ class InsightsRetriever
         return $this->getInsights($uri, self::STRATEGY_DESKTOP);
     }
 
-    private function getEndpoint(UriInterface $uri, $strategy)
+    private function getEndpoint(UriInterface $uri, $strategy, $excludeThirdParty)
     {
         $endpoint = sprintf(self::API_URL, urlencode((string)$uri), $strategy);
 
@@ -51,13 +51,17 @@ class InsightsRetriever
             $endpoint .= '&key=' . $this->apiKey;
         }
 
+        if ($excludeThirdParty) {
+            $endpoint .= '&filter_third_party_resources=true';
+        }
+
         return $endpoint;
     }
 
-    public function getInsights(UriInterface $uri, $strategy)
+    public function getInsights(UriInterface $uri, $strategy, $excludeThirdParty = false)
     {
         try {
-            $endpoint = $this->getEndpoint($uri, $strategy);
+            $endpoint = $this->getEndpoint($uri, $strategy, $excludeThirdParty);
             $response = $this->client->get($endpoint);
             $plainResult = (string)$response->getBody();
             $jsonResult = json_decode($plainResult, true);
