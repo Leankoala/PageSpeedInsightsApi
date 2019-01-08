@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use Leankoala\PageSpeedInsights\Result\Insights;
 use Psr\Http\Message\UriInterface;
+use whm\Html\Uri;
 
 class InsightsRetriever
 {
@@ -43,6 +44,13 @@ class InsightsRetriever
         return $this->getInsights($uri, self::STRATEGY_DESKTOP);
     }
 
+    private function assertValidUrl(UriInterface $uri)
+    {
+        if (Uri::isBasicAuth($uri)) {
+            throw new BasicAuthRetrieverException('It is not possible to use the google page speed scorer for basic auth urls.');
+        }
+    }
+
     private function getEndpoint(UriInterface $uri, $strategy, $excludeThirdParty)
     {
         $endpoint = sprintf(self::API_URL, urlencode((string)$uri), $strategy);
@@ -60,11 +68,15 @@ class InsightsRetriever
 
     public function getInsights(UriInterface $uri, $strategy, $excludeThirdParty = false)
     {
+        $this->assertValidUrl($uri);
+
         try {
             $endpoint = $this->getEndpoint($uri, $strategy, $excludeThirdParty);
             $response = $this->client->get($endpoint);
             $plainResult = (string)$response->getBody();
             $jsonResult = json_decode($plainResult, true);
+        } catch (BasicAuthRetrieverException $e) {
+            throw $e;
         } catch (\GuzzleHttp\Exception\ServerException $e) {
             throw new RetrieverException($e->getResponse()->getBody());
         } catch (ClientException $e) {
